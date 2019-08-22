@@ -1,0 +1,5 @@
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\bin\Debug\netcoreapp2.2\RepositoryCore.dll
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.csproj.CoreCompileInputs.cache
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.AssemblyInfoInputs.cache
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.AssemblyInfo.cs
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.csprojAssemblyReference.cache

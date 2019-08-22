@@ -1,0 +1,5 @@
+D:\project3\RepositoryCore\EntityRepository\LiteRepository\bin\Debug\netcoreapp2.2\LiteRepository.deps.json
+D:\project3\RepositoryCore\EntityRepository\LiteRepository\bin\Debug\netcoreapp2.2\LiteRepository.dll
+D:\project3\RepositoryCore\EntityRepository\LiteRepository\obj\Debug\netcoreapp2.2\LiteRepository.csproj.CoreCompileInputs.cache
+D:\project3\RepositoryCore\EntityRepository\LiteRepository\obj\Debug\netcoreapp2.2\LiteRepository.AssemblyInfoInputs.cache
+D:\project3\RepositoryCore\EntityRepository\LiteRepository\obj\Debug\netcoreapp2.2\LiteRepository.AssemblyInfo.cs
