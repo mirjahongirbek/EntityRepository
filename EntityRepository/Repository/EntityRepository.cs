@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using EntityRepository.Context;
@@ -11,6 +12,7 @@ namespace EntityRepository.Repository
     public class EntityRepository<T> : IRepositoryCore<T, int>
           where T : class, IEntity<int>
     {
+        ICacheCore<T> _cache;
         protected DbContext _db;
         protected DbSet<T> _dbSet;
         public EntityRepository(IDbContext context)
@@ -21,200 +23,243 @@ namespace EntityRepository.Repository
 
         public virtual void Add(T model)
         {
-            _dbSet.FirstOrDefault();
+            _cache?.Add("addMethod: " + model.Id.ToString(), model);
+            _dbSet.Add(model);
+            _db.SaveChanges();
         }
 
-        public virtual Task AddAsync(T module)
+        public virtual async Task AddAsync(T model)
         {
-            throw new NotImplementedException();
+            Add(model);
+
         } 
 
         public virtual void AddRange(List<T> models)
         {
-            throw new NotImplementedException();
+            _cache?.AddRange(models);
+            _dbSet.AddRange(models);
+            _db.SaveChanges();
         }
 
-        public virtual Task AddRangeAsync(List<T> models)
+        public virtual async Task AddRangeAsync(List<T> models)
         {
-            throw new NotImplementedException();
+            AddRange(models);
         }
         #endregion
-
-
-        public virtual IEnumerable<T> CallProcedure(string str)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual T CalProcedure(string functinname, object[] item)
-        {
-            throw new NotImplementedException();
-        }
+       
         #region Count
         public virtual long Count()
         {
-            throw new NotImplementedException();
+           return _dbSet.Count();
         }
 
         public virtual long Count(Expression<Func<T, bool>> expression)
         {
-            throw new NotImplementedException();
+            return _dbSet.Count(expression);
         }
 
         public virtual long Count(string field, string value)
         {
-            throw new NotImplementedException();
+            var props = typeof(T).GetProperty(field);
+            var result = _dbSet.Count(m => props.GetValue(m, null) == value);
+            return result;
         }
         #endregion
         #region Delete
         public virtual T Delete(T model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (model == null) return null;
+                _cache?.Delete(model.Id.ToString());
+                _dbSet.Remove(model);
+                _db.SaveChanges();
+                return model;
+            }catch(Exception ext)
+            {
+                
+                throw;
+            }
+            
         }
 
-        public virtual Task<T> DeleteAsync(T model)
+        public virtual async Task<T> DeleteAsync(T model)
         {
-            throw new NotImplementedException();
+        return    Delete(model);
         }
 
         public virtual T Delete(int id)
         {
-            throw new NotImplementedException();
+
+          return  Delete(Get(id));
+            
         }
 
         public virtual bool DeleteMany(Expression<Func<T, bool>> expression)
         {
-            throw new NotImplementedException();
+           return DeleteMany(Find(expression).ToList());
+            
         }
-
-        public virtual Task<bool> DeleteManyAsync(Expression<Func<T, bool>> expression)
+        public virtual bool DeleteMany(List<T> models)
         {
-            throw new NotImplementedException();
+            _dbSet.RemoveRange(models);
+            return true;
+        }
+        public virtual async Task<bool> DeleteManyAsync(Expression<Func<T, bool>> expression)
+        {
+           return DeleteMany(expression);
         }
         #endregion
         #region Find
         public virtual IEnumerable<T> Find(Expression<Func<T, bool>> selector, int offset, int limit)
         {
-            throw new NotImplementedException();
-        }
+            var result = _dbSet.Where(selector);
+            return result;
 
-        public virtual IEnumerable<T> Find(Expression<Func<T, bool>> keySelector)
+        }
+        public virtual IEnumerable<T> Find(Expression<Func<T, bool>> selector)
         {
-            throw new NotImplementedException();
+            var result = _dbSet.Where(selector).Reverse();
+            return result;
         }
-
         public virtual IEnumerable<T> Find(string field, string value)
         {
-            throw new NotImplementedException();
+            var props = typeof(T).GetProperty(field);
+            var result = _dbSet.Where(m => props.GetValue(m, null) == value);
+            return result;
         }
 
         public virtual IEnumerable<T> Find(string field, string value, int offset, int limit)
         {
-            throw new NotImplementedException();
+            var props = typeof(T).GetProperty(field);
+            var result = _dbSet.Where(m => props.GetValue(m, null) == value).Skip(offset).Take(limit);
+            return result;
         }
 
         public virtual IEnumerable<T> FindAll()
         {
-            throw new NotImplementedException();
+            return _dbSet.ToList();
         }
 
-        public virtual Task<IEnumerable<T>> FindAllAsync()
+        public virtual async Task<IEnumerable<T>> FindAllAsync()
         {
-            throw new NotImplementedException();
+           return FindAll();
+
         }
 
-        public virtual Task<IEnumerable<T>> FindAsync(System.Linq.Expressions.Expression<Func<T, bool>> keySelector)
+        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> keySelector)
         {
-            throw new NotImplementedException();
+           return Find(keySelector);
         }
 
-        public virtual Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> selector, int offset, int limit)
+        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> selector, int offset, int limit)
         {
-            throw new NotImplementedException();
-        }
+            var result = _dbSet.Where(selector).SkipLast(offset).TakeLast(limit);
+            return result;
 
-        public virtual Task<IEnumerable<T>> FindAsync(string field, string value)
-        {
-            throw new NotImplementedException();
         }
-
-        public virtual Task<IEnumerable<T>> FindAsync(string field, string value, int offset, int limit)
+               
+        public virtual IEnumerable<T> FindReverse(Expression<Func<T, bool>> selector)
         {
-            throw new NotImplementedException();
-        }
-
-        public virtual IEnumerable<T> FindReverse(System.Linq.Expressions.Expression<Func<T, bool>> selector)
-        {
-            throw new NotImplementedException();
+           return _dbSet.Where(selector).OrderByDescending(m => m.Id);
         }
 
         public virtual IEnumerable<T> FindReverse(int offset, int limit)
         {
-            throw new NotImplementedException();
+           return _dbSet.OrderByDescending(m => m.Id).Skip(offset).Take(limit);
         }
 
         public virtual IEnumerable<T> FindReverse(string key, string value, int offset, int limit)
         {
-            throw new NotImplementedException();
+           return Find(key, value).OrderByDescending(m => m.Id).Skip(offset).Take(limit);
         }
 
-        public virtual Task<IEnumerable<T>> FindReverseAsync(int offset, int limit)
+        public virtual async Task<IEnumerable<T>> FindReverseAsync(int offset, int limit)
         {
-            throw new NotImplementedException();
+            return FindReverse(offset, limit);
         }
 
-        public virtual Task<IEnumerable<T>> FindReverseAsync(string key, string value, int offset, int limit)
+        #region
+        public virtual async Task<IEnumerable<T>> FindReverseAsync(string key, string value, int offset, int limit)
         {
-            throw new NotImplementedException();
+           return FindReverse(key, value, offset, limit);
         }
+        public virtual async Task<IEnumerable<T>> FindAsync(string field, string value)
+        {
+           return Find(field, value);
+        }
+
+        public virtual async Task<IEnumerable<T>> FindAsync(string field, string value, int offset, int limit)
+        {
+           return Find(field, value, offset, limit);
+        }
+        #endregion
         #endregion
         #region Get Methods
         public virtual T Get(int id)
         {
-            throw new NotImplementedException();
+            T item = null;
+            item = _cache?.Find(id.ToString());
+            if (item != null)
+            {
+                return item;
+            }
+            item = _dbSet.Find(id);
+            return item;
         }
 
-        public virtual Task<T> GetAsync(int id)
+        public virtual async Task<T> GetAsync(int id)
         {
-            throw new NotImplementedException();
+            return Get(id);
         }
 
-        public virtual T GetFirst(Expression<Func<T, bool>> expression)
+        public virtual T GetFirst(Expression<Func<T, bool>> selector)
         {
-            throw new NotImplementedException();
+            var result = _cache?.FindFirst(selector);
+            if (result != null) return result;
+            result = _dbSet.FirstOrDefault(selector);
+            return result;
         }
 
-        public virtual Task<T> GetFirstAsync(Expression<Func<T, bool>> expression)
+        public virtual async Task<T> GetFirstAsync(Expression<Func<T, bool>> expression)
         {
-            throw new NotImplementedException();
+            return GetFirst(expression);
         }
         #endregion
         #region Type
         public Type GetGenericType()
         {
-            throw new NotImplementedException();
+           return typeof(T);
         }
         #endregion
         #region Update
         public virtual void Update(T model)
         {
-            throw new NotImplementedException();
+            _cache?.Update(model.Id.ToString(), model);
+            _dbSet.Update(model);
+            _db.SaveChanges();
+      
         }
 
-        public virtual Task UpdateAsync(T model)
+        public virtual async Task UpdateAsync(T model)
         {
-            throw new NotImplementedException();
+             Update(model);
         }
 
         public virtual void UpdateMany(List<T> models)
         {
-            throw new NotImplementedException();
+            _cache?.Update(models);
+            _dbSet.UpdateRange(models);
+            _db.SaveChanges();
         }
 
-        public virtual Task UpdateManyAsync(List<T> models)
+        public virtual async Task UpdateManyAsync(List<T> models)
         {
-            throw new NotImplementedException();
+            UpdateMany(models);
+
         }
+
+       
         #endregion
     }
 }

@@ -3,3 +3,10 @@ D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreap
 D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.AssemblyInfoInputs.cache
 D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.AssemblyInfo.cs
 D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.csprojAssemblyReference.cache
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\bin\Debug\netcoreapp2.2\EntityRepository.deps.json
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\bin\Debug\netcoreapp2.2\EntityRepository.dll
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\bin\Debug\netcoreapp2.2\EntityRepository.pdb
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\bin\Debug\netcoreapp2.2\RepositoryCore.pdb
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.csproj.CopyComplete
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.dll
+D:\project3\RepositoryCore\EntityRepository\EntityRepository\obj\Debug\netcoreapp2.2\EntityRepository.pdb
