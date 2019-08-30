@@ -26,6 +26,10 @@ namespace LiteRepository.Repository
 
         public void Add(T model)
         {
+            if (string.IsNullOrEmpty(model.Id))
+            {
+                model.Id = ObjectId.NewObjectId().ToString();
+            }
             _cache?.Add(model.Id, model);
             _lite.Insert(model);
         }
@@ -188,7 +192,7 @@ namespace LiteRepository.Repository
 
         public T GetFirst(Expression<Func<T, bool>> expression)
         {
-           var model= _cache.Find(expression);
+           var model= _cache?.Find(expression);
             if (model != null) return model;
            return _lite.FindOne(expression);
         }
