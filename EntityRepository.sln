@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.168
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29409.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityRepository", "EntityRepository\EntityRepository.csproj", "{E0C57F51-5447-496D-AB6B-DB3B5B847CD8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityRepository", "EntityRepository\EntityRepository.csproj", "{E0C57F51-5447-496D-AB6B-DB3B5B847CD8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RepositoryCore", "..\RepositoryCore\RepositoryCore\RepositoryCore.csproj", "{0A6AD27E-870E-4AF1-A254-81511A4CA15E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiteRepository", "LiteRepository\LiteRepository.csproj", "{31D30084-A312-44E9-948D-E5C8880A2A5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiteRepository", "LiteRepository\LiteRepository.csproj", "{31D30084-A312-44E9-948D-E5C8880A2A5C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElasticLogRepository", "..\ElasticLogRepository\ElasticLogRepository.csproj", "{C348E2A2-097D-43BB-958A-F031CB1B9D0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{31D30084-A312-44E9-948D-E5C8880A2A5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31D30084-A312-44E9-948D-E5C8880A2A5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31D30084-A312-44E9-948D-E5C8880A2A5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C348E2A2-097D-43BB-958A-F031CB1B9D0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C348E2A2-097D-43BB-958A-F031CB1B9D0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C348E2A2-097D-43BB-958A-F031CB1B9D0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C348E2A2-097D-43BB-958A-F031CB1B9D0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

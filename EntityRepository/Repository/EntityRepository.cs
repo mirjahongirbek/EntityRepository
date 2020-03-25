@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -12,45 +13,72 @@ namespace EntityRepository.Repository
     public class EntityRepository<T> : IRepositoryCore<T, int>
           where T : class, IEntity<int>
     {
-        ICacheCore<T> _cache;
+        ICacheCoreRepository<T> _cache;
         protected DbContext _db;
         protected DbSet<T> _dbSet;
+        ILoggerCoreRepository<T, int> _log;
         public EntityRepository(IDbContext context)
         {
             _dbSet = context.DataContext.Set<T>();
+            _db = context.DataContext;
+        }
+        public EntityRepository(IDbContext context, ILoggerCoreRepository<T, int> log) : this(context)
+        {
+            _log = log;
+        }
+        public EntityRepository(IDbContext context, ICacheCoreRepository<T> cache) : this(context) { _cache = cache; }
+        public EntityRepository(IDbContext context, ILoggerCoreRepository<T, int> log, ICacheCoreRepository<T> cache) : this(context)
+        {
+            _log = log;
+            _cache = cache;
         }
         #region Add Methods 
 
         public virtual void Add(T model)
         {
-            _cache?.Add("addMethod: " + model.Id.ToString(), model);
-            _dbSet.Add(model);
-            _db.SaveChanges();
+            try
+            {
+                _cache?.Add("addMethod: " + model.Id.ToString(), model);
+                _dbSet.Add(model);
+                _db.SaveChanges();
+                _log.AddDocument(model);
+            }
+            catch(Exception ext)
+            {
+                _log.CatchError(ext.Message, 0, model, ext,"Add", null);
+            }
+            
         }
 
         public virtual async Task AddAsync(T model)
         {
             Add(model);
-
-        } 
+        }
 
         public virtual void AddRange(List<T> models)
         {
-            _cache?.AddRange(models);
-            _dbSet.AddRange(models);
-            _db.SaveChanges();
+            try
+            {
+                _cache?.AddRange(models);
+                _dbSet.AddRange(models);
+                _db.SaveChanges();
+            }catch(Exception ext)
+            {
+                _log.CatchError(ext.Message, 0, models, ext, "Add Range", null);
+                throw;
+            }
+
         }
 
         public virtual async Task AddRangeAsync(List<T> models)
         {
             AddRange(models);
         }
-        #endregion
-       
+        #endregion       
         #region Count
         public virtual long Count()
         {
-           return _dbSet.Count();
+            return _dbSet.Count();
         }
 
         public virtual long Count(Expression<Func<T, bool>> expression)
@@ -74,53 +102,66 @@ namespace EntityRepository.Repository
                 _cache?.Delete(model.Id.ToString());
                 _dbSet.Remove(model);
                 _db.SaveChanges();
+                _log.Delete(model);
                 return model;
-            }catch(Exception ext)
+            }
+            catch (Exception ext)
             {
-                
+                _log.CatchError(ext.Message, 0, model, ext, "Delete", null);
                 throw;
             }
-            
+
         }
 
         public virtual async Task<T> DeleteAsync(T model)
         {
-        return    Delete(model);
+            return Delete(model);
         }
 
         public virtual T Delete(int id)
         {
 
-          return  Delete(Get(id));
-            
+            return Delete(Get(id));
+
         }
 
         public virtual bool DeleteMany(Expression<Func<T, bool>> expression)
         {
-           return DeleteMany(Find(expression).ToList());
-            
+            return DeleteMany(Find(expression).ToList());
+
         }
         public virtual bool DeleteMany(List<T> models)
         {
-            _dbSet.RemoveRange(models);
-            return true;
+            Stopwatch watch = Stopwatch.StartNew();
+            try
+            {
+                _dbSet.RemoveRange(models);
+                _log.DeleteMany(models);
+                return true;
+            }
+            catch(Exception ext)
+            {
+                _log.CatchError(ext.Message, watch.ElapsedMilliseconds, models,ext, "DeleteMany", "");
+                return false;
+            }
+            
         }
         public virtual async Task<bool> DeleteManyAsync(Expression<Func<T, bool>> expression)
         {
-           return DeleteMany(expression);
+            return DeleteMany(expression);
         }
         #endregion
         #region Find
         public virtual IEnumerable<T> Find(Expression<Func<T, bool>> selector, int offset, int limit)
         {
-            var result = _dbSet.Where(selector);
+            var result = _dbSet.Where(selector).OrderByDescending(m => m.Id).Skip(offset).Take(limit).ToList();
             return result;
 
         }
         public virtual IEnumerable<T> Find(Expression<Func<T, bool>> selector)
         {
-            var result = _dbSet.Where(selector).Reverse();
-            return result;
+            return _dbSet.Where(selector);
+
         }
         public virtual IEnumerable<T> Find(string field, string value)
         {
@@ -138,18 +179,18 @@ namespace EntityRepository.Repository
 
         public virtual IEnumerable<T> FindAll()
         {
-            return _dbSet.ToList();
+            return _dbSet;
         }
 
         public virtual async Task<IEnumerable<T>> FindAllAsync()
         {
-           return FindAll();
+            return FindAll();
 
         }
 
         public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> keySelector)
         {
-           return Find(keySelector);
+            return Find(keySelector);
         }
 
         public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> selector, int offset, int limit)
@@ -158,20 +199,24 @@ namespace EntityRepository.Repository
             return result;
 
         }
-               
+
         public virtual IEnumerable<T> FindReverse(Expression<Func<T, bool>> selector)
         {
-           return _dbSet.Where(selector).OrderByDescending(m => m.Id);
+            return _dbSet.Where(selector).OrderByDescending(m => m.Id);
         }
 
+        public IEnumerable<T> FindReverse(Expression<Func<T, bool>> selector, int offset, int limit)
+        {
+            return _dbSet.Where(selector).OrderByDescending(m => m.Id).Skip(offset).Take(limit);
+        }
         public virtual IEnumerable<T> FindReverse(int offset, int limit)
         {
-           return _dbSet.OrderByDescending(m => m.Id).Skip(offset).Take(limit);
+            return _dbSet.OrderByDescending(m => m.Id).Skip(offset).Take(limit);
         }
 
         public virtual IEnumerable<T> FindReverse(string key, string value, int offset, int limit)
         {
-           return Find(key, value).OrderByDescending(m => m.Id).Skip(offset).Take(limit);
+            return Find(key, value).OrderByDescending(m => m.Id).Skip(offset).Take(limit);
         }
 
         public virtual async Task<IEnumerable<T>> FindReverseAsync(int offset, int limit)
@@ -182,16 +227,16 @@ namespace EntityRepository.Repository
         #region
         public virtual async Task<IEnumerable<T>> FindReverseAsync(string key, string value, int offset, int limit)
         {
-           return FindReverse(key, value, offset, limit);
+            return FindReverse(key, value, offset, limit);
         }
         public virtual async Task<IEnumerable<T>> FindAsync(string field, string value)
         {
-           return Find(field, value);
+            return Find(field, value);
         }
 
         public virtual async Task<IEnumerable<T>> FindAsync(string field, string value, int offset, int limit)
         {
-           return Find(field, value, offset, limit);
+            return Find(field, value, offset, limit);
         }
         #endregion
         #endregion
@@ -215,12 +260,17 @@ namespace EntityRepository.Repository
 
         public virtual T GetFirst(Expression<Func<T, bool>> selector)
         {
-            var result = _cache?.FindFirst(selector);
-            if (result != null) return result;
-            result = _dbSet.FirstOrDefault(selector);
+          
+         var   result = _dbSet.FirstOrDefault(selector);
             return result;
         }
-
+        public virtual T GetLast(Expression<Func<T, bool>> selector)
+        {
+            //var result = _cache?.FindFirst(selector);
+            //if (result != null) return result;
+           var  result = _dbSet.OrderByDescending(m => m.Id).FirstOrDefault(selector);
+            return result;
+        }
         public virtual async Task<T> GetFirstAsync(Expression<Func<T, bool>> expression)
         {
             return GetFirst(expression);
@@ -229,7 +279,7 @@ namespace EntityRepository.Repository
         #region Type
         public Type GetGenericType()
         {
-           return typeof(T);
+            return typeof(T);
         }
         #endregion
         #region Update
@@ -238,12 +288,12 @@ namespace EntityRepository.Repository
             _cache?.Update(model.Id.ToString(), model);
             _dbSet.Update(model);
             _db.SaveChanges();
-      
+
         }
 
         public virtual async Task UpdateAsync(T model)
         {
-             Update(model);
+            Update(model);
         }
 
         public virtual void UpdateMany(List<T> models)
@@ -259,7 +309,7 @@ namespace EntityRepository.Repository
 
         }
 
-       
+
         #endregion
     }
 }

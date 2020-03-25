@@ -12,14 +12,14 @@ namespace LiteRepository.Repository
     public class LiteRepository<T> : IRepositoryCore<T, string>
         where T : class, IEntity<string>
     {
-        private ICacheCore<T> _cache;
+        private ICacheCoreRepository<T> _cache;
         private LiteCollection<T> _lite;
 
         public LiteRepository(ILiteContext context)
         {
             _lite = context.Database.GetCollection<T>(typeof(T).Name);
         }
-        public LiteRepository(ILiteContext context, ICacheCore<T> cache)
+        public LiteRepository(ILiteContext context, ICacheCoreRepository<T> cache)
         {
             _cache = cache;
         }
@@ -168,6 +168,11 @@ namespace LiteRepository.Repository
             return Find(key, value).Reverse().Skip(offset).Take(limit);
         }
 
+        public IEnumerable<T> FindReverse(Expression<Func<T, bool>> selector, int offset, int limit)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<IEnumerable<T>> FindReverseAsync(int offset, int limit)
         {
             return FindReverse(offset, limit);
@@ -192,8 +197,8 @@ namespace LiteRepository.Repository
 
         public T GetFirst(Expression<Func<T, bool>> expression)
         {
-           var model= _cache?.Find(expression);
-            if (model != null) return model;
+           //var model= _cache?.Find(expression);
+           // if (model != null) return model;
            return _lite.FindOne(expression);
         }
 
@@ -205,6 +210,13 @@ namespace LiteRepository.Repository
         public Type GetGenericType()
         {
            return typeof(T);
+        }
+
+        public T GetLast(Expression<Func<T, bool>> expression)
+        {
+            //var model = _cache?.Find(expression);
+            //if (model != null) return model;
+            return _lite.Find(expression).OrderByDescending(m=>m.Id).FirstOrDefault();
         }
 
         public void Update(T model)

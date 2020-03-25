@@ -1,15 +1,15 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.2",
-    "signature": "25e396d662d3970d6f05db1e695a729da48b26bb"
+    "signature": ""
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v2.2": {
-      "LiteRepository/1.0.0": {
+      "LiteRepository/0.0.4": {
         "dependencies": {
           "LiteDB": "4.1.4",
-          "RepositoryCore": "1.0.0"
+          "RepositoryCore": "2.0.0.5"
         },
         "runtime": {
           "LiteRepository.dll": {}
@@ -63,7 +63,7 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "RepositoryCore/1.0.0": {
+      "RepositoryCore/2.0.0.5": {
         "runtime": {
           "RepositoryCore.dll": {}
         }
@@ -71,7 +71,7 @@
     }
   },
   "libraries": {
-    "LiteRepository/1.0.0": {
+    "LiteRepository/0.0.4": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -132,7 +132,7 @@
       "path": "system.threading.tasks/4.3.0",
       "hashPath": "system.threading.tasks.4.3.0.nupkg.sha512"
     },
-    "RepositoryCore/1.0.0": {
+    "RepositoryCore/2.0.0.5": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
